@@ -1,0 +1,15 @@
+@(form: play.data.Form[Category])
+
+@main("Welcome to Play 2.0") {
+
+    <script src="@routes.Assets.at("javascripts/index.min.js")" type="text/javascript"></script>
+
+    <ul id="categories"></ul>
+
+    @helper.form(action = routes.Application.createCategory) {
+        @helper.inputText(form("name"))
+        @helper.inputText(form("description"))
+        <input type="submit"/>
+    }
+
+}

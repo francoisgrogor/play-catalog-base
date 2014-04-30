@@ -1,0 +1,24 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                           	@controllers.Application.index
+
+#Items TODO create modify puts
+GET     /items                      	@controllers.Application.findAllItems
+POST    /items/:categoryId              @controllers.Application.createItem(categoryId:Long)
+GET		/items/:id 						@controllers.Application.getItem(id:Long)
+GET		/items/:externalReference 		@controllers.Application.getItemWithExternalReference(externalReference:String)
+GET		/items-for-category/:id			@controllers.Application.findItemsForCategory(id:Long)
+
+
+#Categories TODO create modify puts
+GET     /categories                 	@controllers.Application.findAllCategories
+POST    /categories                 	@controllers.Application.createCategory
+POST    /categories/:parentCategoryId   @controllers.Application.createCategoryWithParentCategory(parentCategoryId:Long)
+GET		/categories/:id 				@controllers.Application.getCategory(id:Long)
+GET		/categories/subcategories/:id	@controllers.Application.findSubCategoriesForCategory(id:Long)
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
