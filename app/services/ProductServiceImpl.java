@@ -1,7 +1,5 @@
 package services;
 
-
-import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -9,12 +7,8 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
-import javax.persistence.criteria.Predicate.BooleanOperator;
 
 import models.Category;
 import models.Item;
@@ -28,76 +22,77 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductServiceImpl implements ProductService {
 
     @PersistenceContext
+	private
     EntityManager em;
 
     @Override
     public void createItem(Item item) {
-        em.persist(item);
+        getEm().persist(item);
     }
 
     @Override
     public List<Item> findAllItems() {
-        CriteriaQuery<Item> c = em.getCriteriaBuilder().createQuery(Item.class);
+        CriteriaQuery<Item> c = getEm().getCriteriaBuilder().createQuery(Item.class);
         c.from(Item.class);
-        return em.createQuery(c).getResultList();
+        return getEm().createQuery(c).getResultList();
     }
     
     
     @Override
     public void createCategory(Category category) {
-        em.persist(category);
+        getEm().persist(category);
     }
 
     @Override
     public List<Category> findAllCategories() {
-        CriteriaQuery<Category> c = em.getCriteriaBuilder().createQuery(Category.class);
+        CriteriaQuery<Category> c = getEm().getCriteriaBuilder().createQuery(Category.class);
         c.from(Category.class);
-        return em.createQuery(c).getResultList();
+        return getEm().createQuery(c).getResultList();
     }
 
 	@Override
 	public Item getItem(Long id) {
-		return em.find(Item.class, id);
+		return getEm().find(Item.class, id);
 	}
 
 	@Override
 	public Category getCategory(Long id) {
-		return em.find(Category.class, id);
+		return getEm().find(Category.class, id);
 	}
 
 	@Override
 	public void createThirdParty(ThirdParty thirdParty) {
-		em.persist(thirdParty);
+		getEm().persist(thirdParty);
 	}
 
 	@Override
 	public List<ThirdParty> findAllThirdParties() {
-        CriteriaQuery<ThirdParty> c = em.getCriteriaBuilder().createQuery(ThirdParty.class);
+        CriteriaQuery<ThirdParty> c = getEm().getCriteriaBuilder().createQuery(ThirdParty.class);
         c.from(ThirdParty.class);
-        return em.createQuery(c).getResultList();
+        return getEm().createQuery(c).getResultList();
 	}
 
 	@Override
 	public ThirdParty getThirdParty(Long id) {
-		return em.find(ThirdParty.class, id);
+		return getEm().find(ThirdParty.class, id);
 	}
 
 	@Override
 	public List<Item> findItemsForCategory(Long categoryId) {		
-		TypedQuery<Item> query = em.createNamedQuery("Items.findItemsForCategory", Item.class);
+		TypedQuery<Item> query = getEm().createNamedQuery("Items.findItemsForCategory", Item.class);
 		query.setParameter("categoryId", categoryId);
 	    return query.getResultList();	
 	}
 
 	@Override
 	public List<Category> findSubCategoriesForCategory(Category category) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaBuilder cb = getEm().getCriteriaBuilder();
         CriteriaQuery<Category> cq = cb.createQuery(Category.class);
         Root<Category> categoryRoot = cq.from(Category.class);
         Predicate predicate = cb.equal(categoryRoot.get("parentCategory"), category);
         cq.where(predicate);
         cq.select(categoryRoot);
-        TypedQuery<Category> tq = em.createQuery(cq);
+        TypedQuery<Category> tq = getEm().createQuery(cq);
         return tq.getResultList();
 	}
 
@@ -109,14 +104,28 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public Item getItemWithExternalReference(String externalReference) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaBuilder cb = getEm().getCriteriaBuilder();
         CriteriaQuery<Item> cq = cb.createQuery(Item.class);
         Root<Item> itemRoot = cq.from(Item.class);
         Predicate predicate = cb.equal(itemRoot.get("externalReference"), externalReference);
         cq.where(predicate);
         cq.select(itemRoot);
-        TypedQuery<Item> tq = em.createQuery(cq);
+        TypedQuery<Item> tq = getEm().createQuery(cq);
         return tq.getSingleResult();
+	}
+
+	@Override
+	public List<Category> findAllCategoriesWithItemsInitialised() {		
+		TypedQuery<Category> query = getEm().createNamedQuery("Category.getAllCategoriesWithItemsInitialised", Category.class);
+	    return query.getResultList();	
+	}
+
+	public EntityManager getEm() {
+		return em;
+	}
+
+	public void setEm(EntityManager em) {
+		this.em = em;
 	}
 
 }

@@ -9,8 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -20,6 +20,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * @author francoisgrogor
  */
 @Entity
+@NamedQuery(name = "Category.getAllCategoriesWithItemsInitialised",
+query = "SELECT c FROM Category c JOIN FETCH c.items i")
 public class Category {
 	
 	@Id
@@ -33,7 +35,7 @@ public class Category {
 	@ManyToOne(optional=true)
 	public Category parentCategory;
 
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="category")
+	@OneToMany(fetch=FetchType.EAGER, mappedBy="category")
 	public List<Item> items;
 	
 	@Override

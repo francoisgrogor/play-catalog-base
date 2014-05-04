@@ -2,6 +2,8 @@ package services;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
+
 import models.Category;
 import models.Item;
 import models.ThirdParty;
@@ -34,5 +36,10 @@ public interface ProductService {
     
     public List<Category> findCategoriesForThirdParty();
     
-    
+    public List<Category> findAllCategoriesWithItemsInitialised();
+
+	public EntityManager getEm();
+
+	public void setEm(EntityManager em);
+
 }

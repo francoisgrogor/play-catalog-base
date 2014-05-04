@@ -9,6 +9,8 @@ import models.Category;
 import models.Item;
 import models.ThirdParty;
 
+import org.hibernate.LazyInitializationException;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -22,7 +24,7 @@ public class ProductServiceTest extends AbstractTransactionalJUnit4SpringContext
 
     @Autowired
     private ProductService productService;
-
+    
     @Test
     public void createAndFindCategory() {
     	
@@ -416,4 +418,72 @@ public class ProductServiceTest extends AbstractTransactionalJUnit4SpringContext
 		assertNotNull(thirdParty);
     }
     
+    @Test 
+    public void getAllCategoriesWithItemsInitialisedTest(){
+    	//Category
+    	Category groceryCategory = new Category();
+		groceryCategory.name = "Groceries";
+		groceryCategory.description = "Groceries";
+
+		productService.createCategory(groceryCategory);	
+		groceryCategory = productService.getCategory(groceryCategory.id);
+		
+		assertNotNull(groceryCategory);
+		assertNull(groceryCategory.parentCategory);
+		
+		//Category
+		Category bakeryCategory = new Category();
+		bakeryCategory.name = "Groceries";
+		bakeryCategory.description = "Groceries";
+		bakeryCategory.parentCategory = groceryCategory;
+		
+		productService.createCategory(bakeryCategory);	
+		bakeryCategory = productService.getCategory(bakeryCategory.id);
+		
+		assertNotNull(bakeryCategory);
+		assertEquals(groceryCategory,bakeryCategory.parentCategory);
+		
+		//Item
+		Item blueRibbonPremierOneBrownBread = new Item();
+		blueRibbonPremierOneBrownBread.name = "Blue Ribbon Premier One Brown Bread";
+		blueRibbonPremierOneBrownBread.description = "Blue Ribbon Premier One Brown Bread";
+		blueRibbonPremierOneBrownBread.price = BigDecimal.TEN;
+		blueRibbonPremierOneBrownBread.externalReference = "xxx02";
+		blueRibbonPremierOneBrownBread.category = bakeryCategory;
+
+		productService.createItem(blueRibbonPremierOneBrownBread);
+		blueRibbonPremierOneBrownBread = productService.getItem(blueRibbonPremierOneBrownBread.id);
+		
+		assertNotNull(blueRibbonPremierOneBrownBread.id);
+		assertEquals(bakeryCategory, blueRibbonPremierOneBrownBread.category);
+		
+		//Item2
+		Item blueRibbonPremierOneWhiteBread = new Item();
+		blueRibbonPremierOneWhiteBread.name = "Blue Ribbon Premier One White Bread";
+		blueRibbonPremierOneWhiteBread.description = "Blue Ribbon Premier One White Bread";
+		blueRibbonPremierOneWhiteBread.price = BigDecimal.TEN;
+		blueRibbonPremierOneWhiteBread.externalReference = "xxx02";
+		blueRibbonPremierOneWhiteBread.category = bakeryCategory;
+
+		productService.createItem(blueRibbonPremierOneWhiteBread);
+		blueRibbonPremierOneWhiteBread = productService.getItem(blueRibbonPremierOneWhiteBread.id);
+		
+		assertNotNull(blueRibbonPremierOneWhiteBread.id);
+		assertEquals(bakeryCategory, blueRibbonPremierOneWhiteBread.category);
+		
+		List<Item> itemsForCategory = productService.findItemsForCategory(bakeryCategory.id);
+		assertEquals(2, itemsForCategory.size());
+		
+		productService.getEm().flush();
+		productService.getEm().clear();
+		
+		//First we test that the items collection is normally lazy loaded
+		List<Category> allCategories = productService.findAllCategories();
+
+		//Ensure eagerly loaded collection
+		for(Category category : allCategories){
+			category.items.size();
+		}
+
+    }
 }

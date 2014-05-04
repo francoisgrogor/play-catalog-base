@@ -1,7 +1,10 @@
 package controllers;
 
+import java.util.List;
+
 import models.Category;
 import models.Item;
+import models.ProductCatalogue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -9,7 +12,6 @@ import play.data.Form;
 import play.libs.Json;
 import play.mvc.Result;
 import services.ProductService;
-
 import views.html.index;;
 
 @org.springframework.stereotype.Controller
@@ -76,10 +78,13 @@ public class Application {
     }
     
     /**
-     * @return entire product catalog inJSON
+     * @return entire product catalog in JSON format
      */
-//    public Result getProductJson(){
-//    	
-//    }
+    public Result getProductJson(){
+    	List<Category> categories = productService.findAllCategoriesWithItemsInitialised();
+    	ProductCatalogue productCatalogue = new ProductCatalogue();
+    	productCatalogue.setCategories(categories);
+    	return play.mvc.Controller.ok(Json.toJson(productCatalogue));
+    }
     
 }
